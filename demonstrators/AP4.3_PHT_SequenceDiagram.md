@@ -3,30 +3,41 @@ sequenceDiagram
     autonumber
     actor User
     participant PHT-Interface
-    participant AOS
-    participant ContainerRegistry
-    participant MessageBroker
+    participant PHT-Backend
+    participant PHT-ContainerRegistry
     participant Station-1..n
+    participant PHT-Connector
+    participant AOS-Connector
+    participant AOS
 
-    User ->> PHT-Interface: Start Personal Health Train
-    PHT-Interface ->> MessageBroker: Init train building
-    MessageBroker ->> ContainerRegistry: Init train container
-    ContainerRegistry ->> AOS: Upload container data
+    User ->> PHT-Interface: Request train
+    PHT-Interface ->> PHT-Backend: Init train
+    PHT-Backend ->> PHT-ContainerRegistry: Push train image
     
     loop
-    Station-1..n ->> ContainerRegistry: Pull container from repo
-    Station-1..n ->> Station-1..n: Update container with station data
-    Station-1..n ->> ContainerRegistry: Push container update
-    ContainerRegistry ->> AOS: Update container data
-    AOS ->> MessageBroker: Notify station complete
+    Station-1..n ->> PHT-Backend: Poll for waiting trains
+    Station-1..n ->> PHT-ContainerRegistry: Pull train
+    Station-1..n ->> Station-1..n: Update train with station data
+    Station-1..n ->> PHT-ContainerRegistry: Push updated train
+    PHT-ContainerRegistry ->> PHT-Backend: Update train status
     end
 
-    User ->> PHT-Interface: Request Personal Health Train result
-
-    PHT-Interface ->> AOS: Request result data
-
-    AOS ->> PHT-Interface: Provide result data
-    Note over AOS,PHT-Interface: Includes access checks<br/>(contracts, ...)
-
+    User ->> PHT-Interface: Request train result
+    PHT-Interface ->> PHT-Backend: Extract and decrypt result from train
     PHT-Interface ->> User: Provide decrypted result data
+    
+    opt
+
+    User ->> PHT-Interface: Publish result
+    PHT-Interface ->> PHT-Backend: Release result data
+    PHT-Interface ->> PHT-Connector: Register asset and contract
+
+    AOS ->> AOS-Connector: Request result data
+    AOS-Connector ->> PHT-Connector: Negotiate
+    Note over AOS,PHT-Interface: Includes access checks<br/>(contracts, ...)
+    AOS-Connector ->> PHT-Connector: Send data transfer request
+    PHT-Connector ->> PHT-Backend: Read data
+    PHT-Connector ->> AOS: Transfer data
+
+    end
 ```
