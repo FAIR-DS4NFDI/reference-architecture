@@ -6,9 +6,9 @@ sequenceDiagram
     participant PHT-Backend
     participant PHT-ContainerRegistry
     participant Station-1..n
-    participant PHT-Connector
-    participant AOS-Connector
-    participant AOS
+    participant PHT-Connector as PHT-Connector (EDC)
+    participant AOS-Connector as Consumer-Connector (EDC)
+    participant AOS as Consumer (e.g., AOS)
 
     User ->> PHT-Interface: Request train
     PHT-Interface ->> PHT-Backend: Init train
