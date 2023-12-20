@@ -2,13 +2,14 @@
 sequenceDiagram
     autonumber
     actor User
+
+    User->>+Validator Service: User Forks & Prepares Validator
+    Note over User,Validator Service: Access Tokens for AOS, Project Settings, ...
+
     User->>+AOS: Data upload
 
     AOS->>AOS: Trigger hook 
     Note over AOS,AOS: Hook trigger depends on its configuration
-
-    AOS->>+Validator Service: Transfer meta information
-    Note over AOS,Validator Service: Upload URL, access token, ...
 
     Validator Service->>AOS: Request data with access token
     AOS->>Validator Service: Transfer uploaded data
